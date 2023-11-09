@@ -57,28 +57,27 @@ function App() {
           value={todoInput}
           onChange={(ev) => setTodoInput(ev.target.value)}
         ></input>
-        {todos.map((item, idx) => (
-          <TodoItem
-            key={idx}
-            label={item.label}
-            is_done={item.is_done}
-            toggle_todo={() =>
-              setTodos(
-                todos.toSpliced(idx, 1, {
-                  label: item.label,
-                  is_done: !item.is_done,
-                })
-              )
-            }
-            delete_todo={() => {
-              setTodos(todos.toSpliced(idx, 1));
-              localStorage.setItem(
-                "todos",
-                JSON.stringify(todos.toSpliced(idx, 1))
-              );
-            }}
-          />
-        ))}
+        {todos.length === 0 ? (
+  <p>No tasks? Add a task.</p>
+) : (
+  todos.map((item, idx) => (
+    <TodoItem
+      key={idx}
+      label={item.label}
+      is_done={item.is_done}
+      toggle_todo={() =>
+        setTodos(
+          todos.map((todo, i) =>
+            i === idx ? { ...todo, is_done: !todo.is_done } : todo
+          )
+        )
+      }
+      delete_todo={() => {
+        setTodos(todos.filter((_, i) => i !== idx));
+      }}
+    />
+  ))
+)}
         <small>
           {todos.filter((item) => !item.is_done).length} todos left to do!
         </small>
