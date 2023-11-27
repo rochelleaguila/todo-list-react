@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import "./App.css";
+import { useState, useEffect } from 'react';
+import './App.css';
 
 function TodoItem({ label, is_done, delete_todo, toggle_todo }) {
   return (
@@ -15,10 +15,10 @@ function TodoItem({ label, is_done, delete_todo, toggle_todo }) {
 
 function App() {
   const [todos, setTodos] = useState([]);
-  const [todoInput, setTodoInput] = useState("");
+  const [todoInput, setTodoInput] = useState('');
 
   useEffect(() => {
-    const local_todos = localStorage.getItem("todos");
+    const local_todos = localStorage.getItem('todos');
     if (local_todos) {
       setTodos(JSON.parse(local_todos));
     }
@@ -26,9 +26,67 @@ function App() {
 
   useEffect(() => {
     if (todos.length) {
-      localStorage.setItem("todos", JSON.stringify(todos));
+      localStorage.setItem('todos', JSON.stringify(todos));
     }
   }, [todos]);
+
+  useEffect(() => {
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr')
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTodos(data);
+        } else {
+          setTodos([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+  const handleTaskDelete = (idx) => {
+    const updatedTodos = todos.filter((_, i) => i !== idx);
+    setTodos(updatedTodos);
+    updateTasksOnServer(updatedTodos);
+  };
+
+  const updateTasksOnServer = (updatedTasks) => {
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr', {
+      method: 'PUT',
+      body: JSON.stringify(updatedTasks),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle response if needed
+      })
+      .catch((error) => {
+        console.error('Error updating tasks:', error);
+      });
+  };
+
+  const clearAllTasksOnServer = () => {
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          setTodos([]); // Clears the local state on successful deletion
+          localStorage.removeItem('todos'); // Optionally, clears local storage
+        } else {
+          console.error('Failed to clear tasks on the server');
+        }
+      })
+      .catch((error) => {
+        console.error('Error clearing tasks:', error);
+      });
+  };
 
   return (
     <>
@@ -36,14 +94,14 @@ function App() {
         onSubmit={(ev) => {
           ev.preventDefault();
           if (todoInput.length > 0) {
-            setTodos([
-              {
-                label: todoInput,
-                is_done: false,
-              },
-              ...todos,
-            ]);
-            setTodoInput("");
+            const newTask = {
+              label: todoInput,
+              is_done: false,
+            };
+            const updatedTasks = [newTask, ...todos];
+            setTodos(updatedTasks);
+            setTodoInput('');
+            updateTasksOnServer(updatedTasks);
           }
         }}
         className="container d-flex flex-column align-items-center justify-content-start"
@@ -57,33 +115,40 @@ function App() {
           value={todoInput}
           onChange={(ev) => setTodoInput(ev.target.value)}
         ></input>
-        {todos.length === 0 ? (
-  <p>No tasks? Add a task.</p>
-) : (
-  todos.map((item, idx) => (
-    <TodoItem
-      key={idx}
-      label={item.label}
-      is_done={item.is_done}
-      toggle_todo={() =>
-        setTodos(
-          todos.map((todo, i) =>
-            i === idx ? { ...todo, is_done: !todo.is_done } : todo
-          )
-        )
-      }
-      delete_todo={() => {
-        setTodos(todos.filter((_, i) => i !== idx));
-      }}
-    />
-  ))
-)}
+        {Array.isArray(todos) && todos.length > 0 ? (
+          todos.map((item, idx) => (
+            <TodoItem
+              key={idx}
+              label={item.label}
+              is_done={item.is_done}
+              toggle_todo={() =>
+                setTodos(
+                  todos.map((todo, i) =>
+                    i === idx ? { ...todo, is_done: !todo.is_done } : todo
+                  )
+                )
+              }
+              delete_todo={() => handleTaskDelete(idx)}
+            />
+          ))
+        ) : (
+          <p>No tasks? Add a task.</p>
+        )}
         <small>
           {todos.filter((item) => !item.is_done).length} todos left to do!
         </small>
+        <button type="button" onClick={clearAllTasksOnServer}>
+          Clear All Tasks
+        </button>
       </form>
     </>
   );
 }
 
 export default App;
+
+
+
+
+
+
