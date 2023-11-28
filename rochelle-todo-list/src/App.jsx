@@ -17,21 +17,21 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [todoInput, setTodoInput] = useState('');
 
-  useEffect(() => {
-    const local_todos = localStorage.getItem('todos');
-    if (local_todos) {
-      setTodos(JSON.parse(local_todos));
-    }
-  }, []);
+  // useEffect(() => {
+  //   const local_todos = localStorage.getItem('todos');
+  //   if (local_todos) {
+  //     setTodos(JSON.parse(local_todos));
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   if (todos.length) {
+  //     localStorage.setItem('todos', JSON.stringify(todos));
+  //   }
+  // }, [todos]);
 
   useEffect(() => {
-    if (todos.length) {
-      localStorage.setItem('todos', JSON.stringify(todos));
-    }
-  }, [todos]);
-
-  useEffect(() => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest')
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelle')
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -52,16 +52,16 @@ function App() {
   };
 
   const updateTasksOnServer = (updatedTasks) => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest', {
-      method: 'DELETE',
-      body: JSON.stringify(updatedTasks), // You might not need this for the DELETE method
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelle', {
+      method: 'PUT',
+      body: JSON.stringify(updatedTasks), 
       headers: {
         'Content-Type': 'application/json',
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        // Handle response if needed
+        setTodos(updatedTasks)
       })
       .catch((error) => {
         console.error('Error updating tasks:', error);
@@ -69,9 +69,9 @@ function App() {
   };
 
   const clearAllTasksOnServer = () => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest', {
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelle', {
       method: 'PUT',
-      body: JSON.stringify([]), // Send an empty array to clear all tasks
+      body: JSON.stringify([{label: "Empty Task", done: false}]), // Send an empty array to clear all tasks
       headers: {
         'Content-Type': 'application/json',
       },
