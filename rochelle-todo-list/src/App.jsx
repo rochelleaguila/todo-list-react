@@ -31,7 +31,7 @@ function App() {
   }, [todos]);
 
   useEffect(() => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr')
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest')
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -52,9 +52,9 @@ function App() {
   };
 
   const updateTasksOnServer = (updatedTasks) => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr', {
-      method: 'PUT',
-      body: JSON.stringify(updatedTasks),
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest', {
+      method: 'DELETE',
+      body: JSON.stringify(updatedTasks), // You might not need this for the DELETE method
       headers: {
         'Content-Type': 'application/json',
       },
@@ -69,8 +69,9 @@ function App() {
   };
 
   const clearAllTasksOnServer = () => {
-    fetch('https://playground.4geeks.com/apis/fake/todos/user/alesanchezr', {
-      method: 'DELETE',
+    fetch('https://playground.4geeks.com/apis/fake/todos/user/rochelletest', {
+      method: 'PUT',
+      body: JSON.stringify([]), // Send an empty array to clear all tasks
       headers: {
         'Content-Type': 'application/json',
       },
@@ -78,7 +79,6 @@ function App() {
       .then((response) => {
         if (response.ok) {
           setTodos([]); // Clears the local state on successful deletion
-          localStorage.removeItem('todos'); // Optionally, clears local storage
         } else {
           console.error('Failed to clear tasks on the server');
         }
@@ -96,7 +96,7 @@ function App() {
           if (todoInput.length > 0) {
             const newTask = {
               label: todoInput,
-              is_done: false,
+              done: false,
             };
             const updatedTasks = [newTask, ...todos];
             setTodos(updatedTasks);
